@@ -16,6 +16,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/form-error";
 import { FormSuccess } from "@/components/form-success";
+import { login } from "@/actions/login";
+import { useState, useTransition } from "react";
 
 export const LoginForm = () => {
   const form = useForm<z.infer<typeof LoginSchema>>({
@@ -26,9 +28,26 @@ export const LoginForm = () => {
     },
   });
 
+  const [pending, startTransition] = useTransition();
+
+  //toget server-side responses (simple approach)
+  const [error, setError] = useState<string | undefined>("");
+  const [success, setSuccess] = useState<string | undefined>("");
+
   const onSubmit = (value: z.infer<typeof LoginSchema>) => {
-    console.log(value);
+    //clear before next response
+    setError("");
+    setSuccess("");
+
+    //
+    startTransition(() =>
+      login(value).then((data) => {
+        setError(data.error);
+        setSuccess(data.success);
+      })
+    );
   };
+
   return (
     <CardWrapper
       headerLabel="Welcome Back"
@@ -50,6 +69,7 @@ export const LoginForm = () => {
                       {...field}
                       placeholder="john.doe@example.com"
                       type="email"
+                      disabled={pending}
                     />
                   </FormControl>
                   <FormMessage />
@@ -63,16 +83,21 @@ export const LoginForm = () => {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="••••••" type="password" />
+                    <Input
+                      {...field}
+                      placeholder="••••••"
+                      type="password"
+                      disabled={pending}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
-          {/* <FormError message="Invalid credentials!" />
-          <FormSuccess message="Success" /> */}
-          <Button type="submit" className="w-full">
+          <FormError message={error} />
+          <FormSuccess message={success} />
+          <Button type="submit" className="w-full" disabled={pending}>
             Sign in
           </Button>
         </form>
