@@ -11,6 +11,7 @@ const { auth } = NextAuth(authConfig);
 
 export default auth((req) => {
   const { nextUrl } = req;
+
   //1. check logging status ture or false
   const isLoggedIn = !!req.auth;
 
@@ -32,16 +33,14 @@ export default auth((req) => {
     if (isLoggedIn) {
       return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl)); //here nextUrl is need for build absolute path url
     }
-    //otherwise restrict
+    //go to /auth/[someurl]
     return;
   }
 
-  //
+  //anything else default go to login page
   if (!isLoggedIn && !isPublicRoute) {
     return Response.redirect(new URL("/auth/login", nextUrl));
   }
-
-  return;
 });
 
 //matcher that runner in middleware

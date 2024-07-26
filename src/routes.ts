@@ -7,8 +7,8 @@
 export const publicRoutes: string[] = ["/", "/auth/new-verification"];
 
 /**
- * An Array of routes that can be used after authentication
- * Theser routes require authentication
+ * An Array of routes that  used  authentication
+ *
  * @type {string[]}
  */
 

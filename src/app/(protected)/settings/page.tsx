@@ -29,13 +29,8 @@ export default SettingPage;
 }
 
 import { logout } from "@/actions/logout";
-import useCurrentUser from "@/hooks/use-current-user";
-import { useSession } from "next-auth/react";
 
 const SettingPage = () => {
-  // const session = useSession();
-  const user = useCurrentUser();
-
   const onClick = () => {
     // signOut();
     logout(); //with server and client combnation

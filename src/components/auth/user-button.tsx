@@ -13,7 +13,7 @@ import { LogoutButton } from "@/components/auth/logout-button";
 
 export const UserButton = () => {
   const user = useCurrentUser();
-  console.log(user);
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
