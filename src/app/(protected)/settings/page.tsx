@@ -28,6 +28,7 @@ export default SettingPage;
 
 //   const onClick = () => {
 //     signOut();
+//  logout()  //with server and client combnation
 //   };
 
 //   return (

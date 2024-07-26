@@ -6,7 +6,6 @@ import { send2FAEmail, sendVerficationEmail } from "@/lib/email";
 import { generateVerificationToken } from "@/lib/generate-verification-token";
 import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
 import { LoginSchema } from "@/schemas";
-import { error } from "console";
 import { AuthError } from "next-auth";
 import * as z from "zod";
 import { generateTwoFactorToken } from "../lib/generate-two-factor-token";
