@@ -2,6 +2,7 @@ import { auth, signOut } from "@/auth";
 
 const SettingPage = async () => {
   const session = await auth();
+
   return (
     <div>
       {JSON.stringify(session)}
@@ -20,3 +21,22 @@ const SettingPage = async () => {
 };
 
 export default SettingPage;
+
+// import { useSession, signOut } from "next-auth/react";
+// const SettingPage = async () => {
+//   const session = useSession();
+
+//   const onClick = () => {
+//     signOut();
+//   };
+
+//   return (
+//     <div>
+//       {JSON.stringify(session)}
+
+//       <button onClick={onClick}>SignOut</button>
+//     </div>
+//   );
+// };
+
+// export default SettingPage;
