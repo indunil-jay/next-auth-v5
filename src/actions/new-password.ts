@@ -1,0 +1,54 @@
+"use server";
+import { getPassswordResetTokenByToken } from "@/data/password-reset-token";
+import { getUserByEmail } from "@/data/user";
+import { NewPasswordSchema } from "@/schemas";
+import * as z from "zod";
+import bcrypt from "bcryptjs";
+import { db } from "@/lib/db";
+
+export const newPassword = async (
+  values: z.infer<typeof NewPasswordSchema>,
+  token?: string | null
+) => {
+  //check token
+  if (!token)
+    return {
+      error: "Missing token",
+    };
+
+  //server side form filed validation
+  const validatedFields = NewPasswordSchema.safeParse(values);
+  if (!validatedFields.success) {
+    return {
+      error: "Invalid fields!",
+    };
+  }
+
+  //extract neccessary fields from validated object
+  const { password } = validatedFields.data;
+
+  //check if the db exists reset token
+  const existingToken = await getPassswordResetTokenByToken(token);
+  if (!existingToken) return { error: "Invalid token" };
+
+  //check that token is expired or not
+  const hasExpired = new Date(existingToken.expiresAt) < new Date();
+  if (hasExpired) return { error: "Token has expired" };
+
+  //check there is user with that token belong email
+  const existingUser = await getUserByEmail(existingToken.email);
+  if (!existingUser) return { error: "User not found" };
+
+  //finally hashed new password and updated in db
+  const hashedPassword = await bcrypt.hash(password, 10);
+  await db.user.update({
+    where: { id: existingUser.id },
+    data: { password: hashedPassword },
+  });
+  //after delete the reset token from table
+  await db.passwordResetToken.delete({
+    where: { id: existingToken.id },
+  });
+
+  return { success: "Password updated successfully!." };
+};
