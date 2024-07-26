@@ -1,4 +1,8 @@
-import { auth, signOut } from "@/auth";
+"use client";
+
+{
+  /** server-side
+  import { auth, signOut } from "@/auth";
 
 const SettingPage = async () => {
   const session = await auth();
@@ -21,23 +25,27 @@ const SettingPage = async () => {
 };
 
 export default SettingPage;
+   */
+}
 
-// import { useSession, signOut } from "next-auth/react";
-// const SettingPage = async () => {
-//   const session = useSession();
+import { logout } from "@/actions/logout";
+import useCurrentUser from "@/hooks/use-current-user";
+import { useSession } from "next-auth/react";
 
-//   const onClick = () => {
-//     signOut();
-//  logout()  //with server and client combnation
-//   };
+const SettingPage = () => {
+  // const session = useSession();
+  const user = useCurrentUser();
 
-//   return (
-//     <div>
-//       {JSON.stringify(session)}
+  const onClick = () => {
+    // signOut();
+    logout(); //with server and client combnation
+  };
 
-//       <button onClick={onClick}>SignOut</button>
-//     </div>
-//   );
-// };
+  return (
+    <div>
+      <button onClick={onClick}>SignOut</button>
+    </div>
+  );
+};
 
-// export default SettingPage;
+export default SettingPage;
