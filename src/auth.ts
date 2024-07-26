@@ -33,6 +33,7 @@ declare module "next-auth" {
 
 // The `JWT` interface can be found in the `next-auth/jwt` submodule
 import { JWT } from "next-auth/jwt";
+import { getTwoFactorConfirmationByUserId } from "./data/two-factor-confirmation";
 
 declare module "next-auth/jwt" {
   /** Returned by the `jwt` callback and `auth`, when using JWT sessions */
@@ -85,6 +86,20 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       if (!existingUser || !existingUser.emailVerified) return false;
 
       //TODO: 2FA
+      if (existingUser.isTwoFactorEnabled) {
+        const twoFactorConfirmation = await getTwoFactorConfirmationByUserId(
+          existingUser.id
+        );
+
+        if (!twoFactorConfirmation) return false;
+
+        //delete two factor confirmation for next sign in
+        await db.twoFactorConfirmation.delete({
+          where: { id: twoFactorConfirmation.id },
+        });
+
+        return true;
+      }
 
       return true;
     },
