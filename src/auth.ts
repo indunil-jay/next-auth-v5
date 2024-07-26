@@ -59,7 +59,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 
       return token;
     },
-    session({ session, token }) {
+    async session({ session, token }) {
       if (session.user && token.sub) {
         //put db id to the session object
         session.user.id = token.sub;
@@ -71,6 +71,14 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       }
 
       return session;
+    },
+
+    async signIn({ user }) {
+      const existingUser = await getUserById(user.id!);
+
+      if (!existingUser || !existingUser.emailVerified) return false;
+
+      return true;
     },
   },
 
