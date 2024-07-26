@@ -34,6 +34,11 @@ model Account {
   @@map("accounts")
 }
 
+enum UserRole {
+  ADMIN
+  USER
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -45,6 +50,9 @@ model User {
   //use for credentials make with mannual
   //optional filed because if we use some provider, then it doesn't  has a password ex:google/github
   password String?
+
+  //additional
+  role UserRole @default(USER)
 
   @@map("users")
 }
