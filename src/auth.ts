@@ -73,13 +73,31 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       return session;
     },
 
-    async signIn({ user }) {
-      const existingUser = await getUserById(user.id!);
+    // async signIn({ user }) {
+    //   const existingUser = await getUserById(user.id!);
 
-      if (!existingUser || !existingUser.emailVerified) return false;
+    //   if (!existingUser || !existingUser.emailVerified) return false;
 
-      return true;
+    //   return true;
+    // },
+  },
+
+  //handle side effects regarding to authentication
+  events: {
+    // here what does is that, we automatically populate the some db properties
+    // because we can completely trust that provider no need further verification
+    async linkAccount({ user }) {
+      await db.user.update({
+        where: { id: user.id },
+        data: { emailVerified: new Date() },
+      });
     },
+  },
+
+  //use for change default ui which provides bu next auth
+  pages: {
+    signIn: "/auth/login",
+    error: "/auth/error",
   },
 
   adapter: PrismaAdapter(db),
