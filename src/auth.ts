@@ -19,8 +19,8 @@ declare module "next-auth" {
    */
   interface Session {
     user: {
-      /** The user's postal address. */
       role: UserRole;
+      isTwoFactorEnabled: boolean;
       /**
        * By default, TypeScript merges new interface properties and overwrites existing ones.
        * In this case, the default session user properties will be overwritten,
@@ -39,6 +39,7 @@ declare module "next-auth/jwt" {
   /** Returned by the `jwt` callback and `auth`, when using JWT sessions */
   interface JWT {
     role: UserRole;
+    isTwoFactorEnabled: boolean;
   }
 }
 
@@ -55,8 +56,10 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       //2.get user by db id from db
       const existingUser = await getUserById(token.sub);
       if (!existingUser) return token;
+
       //3.set the role to the token
       token.role = existingUser.role;
+      token.isTwoFactorEnabled = existingUser.isTwoFactorEnabled;
 
       return token;
     },
@@ -69,6 +72,10 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       //4. set user role to the session object
       if (session.user && token.role) {
         session.user.role = token.role;
+      }
+
+      if (session.user && token.isTwoFactorEnabled) {
+        session.user.isTwoFactorEnabled = token.isTwoFactorEnabled;
       }
 
       return session;
