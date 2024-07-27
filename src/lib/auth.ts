@@ -13,3 +13,17 @@ export const currentUser = async (): Promise<Session["user"] | undefined> => {
   const session = await auth();
   return session?.user;
 };
+
+/**
+ * currentRole is a function to get current role from server-side session.
+ * @async
+ * @function
+ * @returns {Promise<Session["user"]["role"]>} A promise that resolves to the current user role, otherwise null
+ */
+
+export const currentRole = async (): Promise<
+  Session["user"]["role"] | undefined
+> => {
+  const session = await auth();
+  return session?.user.role;
+};
