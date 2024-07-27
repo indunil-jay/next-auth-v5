@@ -28,18 +28,90 @@ export default SettingPage;
    */
 }
 
-import { logout } from "@/actions/logout";
+import { settings } from "@/actions/settings";
+import { FormError } from "@/components/form-error";
+import { FormSuccess } from "@/components/form-success";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import useCurrentUser from "@/hooks/use-current-user";
+import { SettingSchema } from "@/schemas";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useSession } from "next-auth/react";
+import { useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 
 const SettingPage = () => {
-  const onClick = () => {
-    // signOut();
-    logout(); //with server and client combnation
-  };
+  const [error, setError] = useState<string | undefined>();
+  const [success, setSuccess] = useState<string | undefined>();
+  const { update } = useSession();
+  const user = useCurrentUser();
 
+  const form = useForm<z.infer<typeof SettingSchema>>({
+    resolver: zodResolver(SettingSchema),
+    defaultValues: {
+      name: user?.user.name || undefined,
+    },
+  });
+
+  const [pending, startTransition] = useTransition();
+  const onClick = (values: z.infer<typeof SettingSchema>) => {
+    startTransition(() => {
+      settings(values)
+        .then((data) => {
+          if (data.error) {
+            setError(data.error);
+          }
+          if (data.success) {
+            setSuccess(data.success);
+            update();
+          }
+        })
+        .catch(() => setError("something went wrong"));
+    });
+  };
   return (
-    <div>
-      <button onClick={onClick}>SignOut</button>
-    </div>
+    <Card className="w-[600px]">
+      <CardHeader>
+        <p className="text-2xl text-center font-semibold">🛠️ Settings</p>
+      </CardHeader>
+
+      <CardContent>
+        <Form {...form}>
+          <form className="space-y-4" onSubmit={form.handleSubmit(onClick)}>
+            <div className="space-y-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => {
+                  return (
+                    <FormItem>
+                      <FormLabel>Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} disabled={pending} />
+                      </FormControl>
+                    </FormItem>
+                  );
+                }}
+              />
+            </div>
+            <FormError message={error} />
+            <FormSuccess message={success} />
+            <Button type="submit" disabled={pending}>
+              Save
+            </Button>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
   );
 };
 

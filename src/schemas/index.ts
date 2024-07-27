@@ -8,6 +8,7 @@ export const LoginSchema = z.object({
   password: z.string().min(1, { message: "password is required." }),
   code: z.optional(z.string()),
 });
+
 export const RegisterSchema = z.object({
   email: z
     .string()
@@ -32,4 +33,8 @@ export const NewPasswordSchema = z.object({
     .string()
     .min(1, { message: "password is required." })
     .min(6, { message: "password must contains atleast 6 characters." }),
+});
+
+export const SettingSchema = z.object({
+  name: z.optional(z.string()),
 });

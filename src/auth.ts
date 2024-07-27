@@ -21,6 +21,7 @@ declare module "next-auth" {
     user: {
       role: UserRole;
       isTwoFactorEnabled: boolean;
+      isOAuth: boolean;
       /**
        * By default, TypeScript merges new interface properties and overwrites existing ones.
        * In this case, the default session user properties will be overwritten,
@@ -34,12 +35,14 @@ declare module "next-auth" {
 // The `JWT` interface can be found in the `next-auth/jwt` submodule
 import { JWT } from "next-auth/jwt";
 import { getTwoFactorConfirmationByUserId } from "./data/two-factor-confirmation";
+import { getAccountByUserId } from "./data/account";
 
 declare module "next-auth/jwt" {
   /** Returned by the `jwt` callback and `auth`, when using JWT sessions */
   interface JWT {
     role: UserRole;
     isTwoFactorEnabled: boolean;
+    isOAuth: boolean;
   }
 }
 
@@ -57,9 +60,17 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       const existingUser = await getUserById(token.sub);
       if (!existingUser) return token;
 
+      //4 check for account is provder account
+      const existingAccount = await getAccountByUserId(existingUser.id);
+      token.isOAuth = !!existingAccount;
+
       //3.set the role to the token
       token.role = existingUser.role;
       token.isTwoFactorEnabled = existingUser.isTwoFactorEnabled;
+
+      //<<to automatically update session when there is updates>>
+      token.email = existingUser.email;
+      token.name = existingUser.name;
 
       return token;
     },
@@ -76,6 +87,15 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 
       if (session.user && token.isTwoFactorEnabled) {
         session.user.isTwoFactorEnabled = token.isTwoFactorEnabled;
+      }
+
+      //<<to automatically update session when there is updates>>
+      if (session.user) {
+        session.user.email = token.email!;
+        session.user.name = token.name;
+
+        //
+        session.user.isOAuth = token.isOAuth;
       }
 
       return session;
